@@ -6,22 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/middle-text"
+    <Button
+        android:id="@+id/documents_btn"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="32dp"
+        android:background="@color/colorPrimary"
+        android:lineSpacingExtra="8sp"
+        android:padding="12dp"
+        android:text="Semua Dokumen"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/pubkey-text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintStart_toStartOf="@+id/middle-text"
-        app:layout_constraintTop_toBottomOf="@+id/middle-text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

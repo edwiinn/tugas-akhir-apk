@@ -30,12 +30,10 @@ import java.security.cert.CertificateFactory
 import com.edwiinn.digitalsignature.model.UploadDocumentResponse
 
 
-class MainActivityBackup2 : AppCompatActivity() {
+class MainActivityBackup3 : AppCompatActivity() {
 
     private lateinit var kpg: KeyPairGenerator
     private val keySize: Int = 2048
-    private lateinit var kp: KeyPair
-    private lateinit var privateKey: PrivateKey
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,28 +41,23 @@ class MainActivityBackup2 : AppCompatActivity() {
 
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
-        Log.d("tag", "Creating key")
-
-        try {
-            kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEYSTORE)
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
+        if (!keyStore.containsAlias(ANDROID_KEYALIAS)){
+            Log.d("tag", "Creating key")
+            try {
+                kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, ANDROID_KEYSTORE)
+            } catch (e: NoSuchAlgorithmException) {
+                e.printStackTrace()
+            }
+            kpg.initialize(
+                KeyGenParameterSpec.Builder(
+                    ANDROID_KEYALIAS,
+                    KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_ENCRYPT)
+                    .setDigests(KeyProperties.DIGEST_SHA256)
+                    .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+                    .setKeySize(keySize)
+                    .build())
+            kpg.generateKeyPair()
         }
-        kpg.initialize(
-            KeyGenParameterSpec.Builder(
-                ANDROID_KEYALIAS,
-                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_ENCRYPT)
-                .setDigests(KeyProperties.DIGEST_SHA256)
-                .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-                .setKeySize(keySize)
-                .build())
-        kp = kpg.generateKeyPair()
-        privateKey = kp.private
-//        val kp = getKeyPair(keyStore, ANDROID_KEYALIAS)
-        val csr = CsrHelper.generateCSR(kp, "Edwin")
-        val encryptedCsr = Base64.encodeToString(csr.encoded, Base64.DEFAULT)
-        val csrString =
-            "-----BEGIN CERTIFICATE REQUEST-----\n$encryptedCsr-----END CERTIFICATE REQUEST-----\n"
 
         val client = OkHttpClient().newBuilder()
             .addInterceptor(HttpLoggingInterceptor().apply {
@@ -80,28 +73,37 @@ class MainActivityBackup2 : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val mCertificationService = retrofit.create<CertificationService>(CertificationService::class.java!!)
-        mCertificationService.signCSR(csrString).enqueue(object:
-            Callback<ResponseBody> {
-            override fun onResponse(
-                call: Call<ResponseBody>,
-                response: Response<ResponseBody>
-            ) {
-                if(response.code() == 200){
-//                    pubkey_text.text = response.body()?.contentType().toString()
-                    val file = File(applicationContext.filesDir, "certificate.cert")
-                    val isWrittenToDisk = writeResponseBodyToDisk(response.body(), file)
-                    if (isWrittenToDisk) {
-                        Log.d("tag", "Download Succesfull")
-                        val certificateFile = File(applicationContext.filesDir,"certificate.cert")
-                        Log.d("certificate", certificateFile.readText(Charsets.UTF_8))
+        val kp = getKeyPair(keyStore, ANDROID_KEYALIAS)
+        if (kp != null){
+            Log.d("key pair", "There is a key pair owo")
+            val csr = CsrHelper.generateCSR(kp, "Edwin")
+            val encryptedCsr = Base64.encodeToString(csr.encoded, Base64.DEFAULT)
+            val csrString =
+                "-----BEGIN CERTIFICATE REQUEST-----\n$encryptedCsr-----END CERTIFICATE REQUEST-----\n"
+
+            val mCertificationService = retrofit.create<CertificationService>(CertificationService::class.java!!)
+            mCertificationService.signCSR(csrString).enqueue(object:
+                Callback<ResponseBody> {
+                override fun onResponse(
+                    call: Call<ResponseBody>,
+                    response: Response<ResponseBody>
+                ) {
+                    if(response.code() == 200){
+//                        pubkey_text.text = response.body()?.contentType().toString()
+                        val file = File(applicationContext.filesDir, "certificate.cert")
+                        val isWrittenToDisk = writeResponseBodyToDisk(response.body(), file)
+                        if (isWrittenToDisk) {
+                            Log.d("tag", "Download Succesfull")
+                            val certificateFile = File(applicationContext.filesDir,"certificate.cert")
+                            Log.d("certificate", certificateFile.readText(Charsets.UTF_8))
+                        }
                     }
                 }
-            }
-            override fun onFailure(call: Call<ResponseBody>, error: Throwable) {
-                Log.e("tag", "Error ${error.message}")
-            }
-        })
+                override fun onFailure(call: Call<ResponseBody>, error: Throwable) {
+                    Log.e("tag", "Error ${error.message}")
+                }
+            })
+        }
 
         val documentService = retrofit.create<DocumentService>(
             DocumentService::class.java!!)
@@ -128,16 +130,16 @@ class MainActivityBackup2 : AppCompatActivity() {
                             isX509Cert.close()
                             val chain2 = Array(20) { cert }
 //
-//                            val ks: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-//                            ks.load(null)
-//                            val entry: KeyStore.Entry = ks.getEntry(ANDROID_KEYALIAS, null)
-//                            if (entry !is KeyStore.PrivateKeyEntry) {
-//                                Log.w("tag", "Not an instance of a PrivateKeyEntry")
-//                                return
-//                            }
-//                            val privateKey = entry.privateKey
+                            val ks: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+                            ks.load(null)
+                            val entry: KeyStore.Entry = ks.getEntry(ANDROID_KEYALIAS, null)
+                            if (entry !is KeyStore.PrivateKeyEntry) {
+                                Log.w("tag", "Not an instance of a PrivateKeyEntry")
+                                return
+                            }
+                            val privateKey = entry.privateKey
                             val src = File(applicationContext.filesDir,"blank.pdf").toString()
-                            val dst = File(applicationContext.filesDir,"new-blank.pdf").toString()
+                            val dst = File(applicationContext.filesDir,"new-blank-2.pdf").toString()
                             SignHelper.sign(src, dst, chain2, privateKey, DigestAlgorithms.SHA256, "AndroidKeyStoreBCWorkaround", PdfSigner.CryptoStandard.CMS, "Only Testing", "Surabaya")
                         } catch (e: Exception){
                             Log.e("something failed", e.message)
@@ -151,7 +153,7 @@ class MainActivityBackup2 : AppCompatActivity() {
                 Log.e("tag", "Error ${error.message}")
             }
         })
-        val file = File(applicationContext.filesDir, "new-blank.pdf")
+        val file = File(applicationContext.filesDir, "new-blank-2.pdf")
         val requestBody = RequestBody.create(MediaType.parse("*/*"), file)
         val fileToUpload = MultipartBody.Part.createFormData("document", file.name, requestBody)
 
@@ -176,7 +178,7 @@ class MainActivityBackup2 : AppCompatActivity() {
             }
         })
     }
-
+    //
     private fun writeResponseBodyToDisk(body: ResponseBody?, fileLocation: File): Boolean {
         try {
             Log.d("tag", "Location $fileLocation")

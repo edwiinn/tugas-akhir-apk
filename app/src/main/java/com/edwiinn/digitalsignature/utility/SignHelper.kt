@@ -1,6 +1,7 @@
 package com.edwiinn.digitalsignature.utility
 
 import android.util.Log
+import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.signatures.BouncyCastleDigest
@@ -29,7 +30,7 @@ object SignHelper {
             .setReason(reason)
             .setLocation(location)
             .setReuseAppearance(false)
-        val rect = Rectangle(36F, 648F, 200F, 100F)
+        val rect = Rectangle(PageSize.A4.bottom - 120F, 648F, 200F, 100F)
         appearance.setPageRect(rect).pageNumber = 1
         signer.fieldName = "sig"
         // Creating the signature
