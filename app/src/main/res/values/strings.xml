@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Digital Signature</string>
+    <string name="title_activity_document_sign">DocumentSignActivity</string>
+    <string name="title_document_preview">Preview</string>
+    <string name="title_document_electronic_sign">Electronic Sign</string>
+    <string name="title_document_digital_sign">Digital Sign</string>
 </resources>

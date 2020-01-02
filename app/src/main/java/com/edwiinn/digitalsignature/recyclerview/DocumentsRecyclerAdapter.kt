@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.edwiinn.digitalsignature.DocumentActivity
+import com.edwiinn.digitalsignature.DocumentSignActivity
 import com.edwiinn.digitalsignature.R
 import com.edwiinn.digitalsignature.model.Document
 import kotlinx.android.synthetic.main.document_row.view.*
@@ -31,9 +32,12 @@ class DocumentsRecyclerAdapter(var documents: List<Document>): RecyclerView.Adap
         fun bind(document: Document) {
             documentTitleView.text = document.title
             signButton.setOnClickListener{
-                val documentIntent = Intent(context, DocumentActivity::class.java)
-                documentIntent.putExtra("filename", document.title)
-                context.startActivity(documentIntent)
+//                val documentIntent = Intent(context, DocumentActivity::class.java)
+//                documentIntent.putExtra("filename", document.title)
+//                context.startActivity(documentIntent)
+
+                val documentSignIntent = Intent(context, DocumentSignActivity::class.java)
+                context.startActivity(documentSignIntent)
             }
         }
     }
